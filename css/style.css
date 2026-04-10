@@ -145,6 +145,50 @@ p {
     text-align: center;
 }
 
+/* ---------- Accessibility ---------- */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.skip-to-content {
+    position: absolute;
+    top: -100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--primary);
+    color: var(--white);
+    padding: 12px 24px;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    z-index: 10000;
+    transition: top 0.3s ease;
+}
+
+.skip-to-content:focus {
+    top: 10px;
+}
+
+/* ---------- Global Focus Styles ---------- */
+*:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+button:focus-visible,
+a:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+}
+
 /* ---------- Section Headers ---------- */
 .section-header {
     max-width: 650px;
@@ -326,6 +370,23 @@ p {
     transform: translateY(0);
 }
 
+/* ---------- Reduced Motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .fade-in {
+        opacity: 1;
+        transform: none;
+    }
+}
+
 /* ---------- Selection ---------- */
 ::selection {
     background: var(--primary);
@@ -448,6 +509,7 @@ p {
     background: var(--white);
     transition: var(--transition);
     box-shadow: none;
+    will-change: box-shadow, background;
 }
 
 .header.scrolled {
