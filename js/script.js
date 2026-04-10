@@ -4,6 +4,18 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
+    // ---------- Utility: Throttle ----------
+    const throttle = (fn, delay) => {
+        let lastCall = 0;
+        return (...args) => {
+            const now = Date.now();
+            if (now - lastCall >= delay) {
+                lastCall = now;
+                fn(...args);
+            }
+        };
+    };
+
     /* ============================================
        JS PHASE 1: NAVIGATION, HEADER & SMOOTH SCROLL
        ============================================ */
@@ -23,25 +35,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', throttle(handleScroll, 16), { passive: true });
 
     // ---------- Hamburger Menu Toggle ----------
     const toggleMenu = () => {
         hamburger.classList.toggle('active');
         navMenu.classList.toggle('active');
-        document.body.style.overflow = navMenu.classList.contains('active') ? 'hidden' : '';
+        const isOpen = navMenu.classList.contains('active');
+        document.body.style.overflow = isOpen ? 'hidden' : '';
+        hamburger.setAttribute('aria-expanded', isOpen);
     };
 
     hamburger.addEventListener('click', toggleMenu);
 
+    // Helper to close mobile menu
+    const closeMenu = () => {
+        hamburger.classList.remove('active');
+        navMenu.classList.remove('active');
+        hamburger.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
+    };
+
     // Close menu when clicking a nav link
     navLinks.forEach(link => {
         link.addEventListener('click', () => {
-            if (navMenu.classList.contains('active')) {
-                hamburger.classList.remove('active');
-                navMenu.classList.remove('active');
-                document.body.style.overflow = '';
-            }
+            if (navMenu.classList.contains('active')) closeMenu();
         });
     });
 
@@ -50,9 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (navMenu.classList.contains('active') &&
             !navMenu.contains(e.target) &&
             !hamburger.contains(e.target)) {
-            hamburger.classList.remove('active');
-            navMenu.classList.remove('active');
-            document.body.style.overflow = '';
+            closeMenu();
         }
     });
 
@@ -78,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    window.addEventListener('scroll', highlightNavOnScroll);
+    window.addEventListener('scroll', throttle(highlightNavOnScroll, 100), { passive: true });
 
     // ---------- Smooth Scroll for Anchor Links ----------
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -328,7 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    window.addEventListener('scroll', toggleBackToTop);
+    window.addEventListener('scroll', throttle(toggleBackToTop, 100), { passive: true });
 
     if (backToTopBtn) {
         backToTopBtn.addEventListener('click', () => {
@@ -469,13 +485,36 @@ document.addEventListener('DOMContentLoaded', () => {
     // ---------- Appointment Form Handling ----------
     const appointmentForm = document.getElementById('appointmentForm');
 
+    // Set min date to today for the date input
+    const dateInput = document.getElementById('appt-date');
+    if (dateInput) {
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.setAttribute('min', today);
+    }
+
     if (appointmentForm) {
         appointmentForm.addEventListener('submit', (e) => {
             e.preventDefault();
 
+            // Validate phone number
+            const phoneInput = document.getElementById('appt-phone');
+            const phoneValue = phoneInput ? phoneInput.value.replace(/\s/g, '') : '';
+            if (phoneValue && phoneValue.replace(/[+\-]/g, '').length < 7) {
+                phoneInput.setCustomValidity('Please enter a valid phone number');
+                phoneInput.reportValidity();
+                return;
+            }
+            if (phoneInput) phoneInput.setCustomValidity('');
+
             const formData = new FormData(appointmentForm);
             const submitBtn = appointmentForm.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
+
+            // Log form data for debugging (replace with real API call)
+            if (typeof console !== 'undefined') {
+                const data = Object.fromEntries(formData.entries());
+                console.log('Appointment form submitted:', data);
+            }
 
             // Show loading state
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
