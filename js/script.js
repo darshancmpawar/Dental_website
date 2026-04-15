@@ -585,4 +585,67 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
+    /* ============================================
+       JS PHASE 5: MICRO-INTERACTIONS (Ripple, Tilt, Cursor follow)
+       ============================================ */
+
+    // ---------- Button Ripple Effect ----------
+    const rippleButtons = document.querySelectorAll('.btn');
+    rippleButtons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            const rect = this.getBoundingClientRect();
+            const ripple = document.createElement('span');
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+
+            ripple.className = 'btn-ripple';
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+
+            // Ensure button allows relative positioning for ripple
+            if (getComputedStyle(this).position === 'static') {
+                this.style.position = 'relative';
+            }
+            this.style.overflow = 'hidden';
+
+            this.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+        });
+    });
+
+    // ---------- Subtle Card Tilt on Hover (service & tech cards) ----------
+    const tiltCards = document.querySelectorAll('.service-card, .tech-card');
+    const MAX_TILT = 6; // degrees
+
+    tiltCards.forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+
+            const rotateY = ((x - centerX) / centerX) * MAX_TILT;
+            const rotateX = -((y - centerY) / centerY) * MAX_TILT;
+
+            card.style.transform = `translateY(-10px) perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        });
+
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = '';
+        });
+    });
+
+    // ---------- Animate hero badge glow on slide change ----------
+    // Already handled via CSS pulse animation.
+
+    // ---------- Prevent tilt on touch devices ----------
+    if ('ontouchstart' in window) {
+        tiltCards.forEach(card => {
+            card.style.transform = '';
+        });
+    }
+
 }); // end DOMContentLoaded
