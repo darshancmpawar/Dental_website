@@ -1,5 +1,5 @@
 /* ============================================
-   SR DENTAL ZONE - Main JavaScript
+   VITA DENTISTRY - Main JavaScript
    ============================================ */
 
 document.addEventListener('DOMContentLoaded', () => {
